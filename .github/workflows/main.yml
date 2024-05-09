@@ -1,4 +1,5 @@
 name: Upload Images to Amazon EFS
+
 on:
   push:
     paths:
@@ -12,13 +13,31 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - name: Set up AWS credentials from GitHub Secrets
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Retrieve AWS credentials from AWS Secrets Manager
+        run: |
+          aws secretsmanager get-secret-value --secret-id YourAWSSecretID --query 'SecretString' --output text > aws_creds.json
+
+      - name: Set up AWS credentials from AWS Secrets Manager
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ fromJson(file('./aws_creds.json')).aws_access_key_id }}
+          aws-secret-access-key: ${{ fromJson(file('./aws_creds.json')).aws_secret_access_key }}
+          aws-region: us-east-1
+
       - name: Find new images
         id: find_images
         run: |
           echo "::set-output name=images::$(find imagens -type f \( -name '*.jpg' -o -name '*.png' \))"
 
       - name: Mount Amazon EFS
-        run: sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport fs-01585c82713417e99.efs.us-east-1.amazonaws.com:/ /efs
+        run: sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport fs-01585c82713417e99.efs.us-east-1.amazonaws.com:/ efs
 
       - name: Copy images to Amazon EFS
         run: |
