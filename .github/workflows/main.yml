@@ -3,7 +3,7 @@ name: Upload Images to Amazon EFS
 on:
   push:
     paths:
-      - 'Imagens/**'
+      - 'C:\Users\53890177816\Documents\imagem'
 
 jobs:
   upload_images:
@@ -42,5 +42,5 @@ jobs:
       - name: Copy images to Amazon EFS
         run: |
           for image in ${{ steps.find_images.outputs.images }}; do
-            cp $image /mnt/efs
+            cp C:\Users\53890177816\Documents\imagem * /mnt/efs
           done
