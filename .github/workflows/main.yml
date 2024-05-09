@@ -25,5 +25,5 @@ jobs:
           username: ${{ secrets.SCP_USERNAME }}
           key: ${{ secrets.SCP_PRIVATE_KEY }}
           port: ${{ secrets.SCP_PORT }}
-          source: "./bb165c8fcecf107962691450d7505dd3.jpg"  # Caminho da imagem dentro do repositório
+          source: "./bb165c8fcecf107962691450d7505dd3.jpg"  # Caminho da imagem dentro do repositórios
           target: "/home/ec2-user/efs"  # Caminho de destino no servidor remotos
