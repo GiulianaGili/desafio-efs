@@ -3,7 +3,7 @@ name: Upload Images to Amazon EFS
 on:
   push:
     paths:
-      - 'imagens/**'
+      - 'C:\Users\53890177816\OneDrive - SESISENAISP - Escolas\Imagens'
 
 jobs:
   upload_images:
