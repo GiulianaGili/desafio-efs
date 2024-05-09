@@ -3,7 +3,7 @@ name: Upload Images to Amazon EFS
 on:
   push:
     paths:
-      - 'imagens/'
+      - '/Documentos/imagem/'
 
 jobs:
   upload_images:
