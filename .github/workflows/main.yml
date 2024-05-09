@@ -1,46 +1,29 @@
-name: Upload Images to Amazon EFS
+name: Sync Images to Server
 
 on:
   push:
-    paths:
-      - 'imagem/**'
+    branches:
+      - main
+    paths-ignore:
+      - "*.txt"
 
 jobs:
-  upload_images:
+  sync-images:
     runs-on: ubuntu-latest
-
+    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-
-      - name: Set up AWS credentials from GitHub Secrets
-        uses: aws-actions/configure-aws-credentials@v1
+        
+      - name: Set file permissions
+        run: chmod 666 bb165c8fcecf107962691450d7505dd3.jpg  # Define permissões máximas para o arquivo
+        
+      - name: Upload image via SCP
+        uses: appleboy/scp-action@master
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
-
-      - name: Retrieve AWS credentials from AWS Secrets Manager
-        run: |
-          aws secretsmanager get-secret-value --secret-id YourAWSSecretID --query 'SecretString' --output text > aws_creds.json
-
-      - name: Set up AWS credentials from AWS Secrets Manager
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ fromJson(file('./aws_creds.json')).aws_access_key_id }}
-          aws-secret-access-key: ${{ fromJson(file('./aws_creds.json')).aws_secret_access_key }}
-          aws-region: us-east-1
-
-      - name: Find new images
-        id: find_images
-        run: |
-          echo "::set-output name=images::$(find imagens -type f \( -name '*.jpg' -o -name '*.png' \))"
-
-      - name: Mount Amazon EFS
-        run: sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport fs-01585c82713417e99.efs.us-east-1.amazonaws.com:/ efs
-
-      - name: Copy images to Amazon EFS
-        run: |
-          for image in ${{ steps.find_images.outputs.images }}; do
-            cp $image /home/ec2-user/efs
-          done
+          host: ${{ secrets.SCP_HOST }}
+          username: ${{ secrets.SCP_USERNAME }}
+          key: ${{ secrets.SCP_PRIVATE_KEY }}
+          port: ${{ secrets.SCP_PORT }}
+          source: "./bb165c8fcecf107962691450d7505dd3.jpg"  # Caminho da imagem dentro do repositório
+          target: "/mnt/efs"  # Caminho de destino no servidor remoto
